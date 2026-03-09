@@ -167,10 +167,28 @@ const ProductsTable = ({ products, itemCount, deleteHandler }) => {
                       </span>
                     </td>
                     <td className="px-6 py-3">
-                      <span className="font-bold text-lg text-gray-900">
-                        {product?.price}{" "}
-                        <span className="text-sm text-gray-500">FDj</span>
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-lg text-gray-900">
+                          {product?.price}{" "}
+                          <span className="text-sm text-gray-500">FDj</span>
+                        </span>
+                        {product?.oldPrice && (
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-xs text-gray-400 line-through">
+                              {product.oldPrice} FDj
+                            </span>
+                            <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">
+                              -
+                              {Math.round(
+                                ((product.oldPrice - product.price) /
+                                  product.oldPrice) *
+                                  100,
+                              )}
+                              %
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-3">
                       <span
@@ -279,6 +297,22 @@ const ProductsTable = ({ products, itemCount, deleteHandler }) => {
                       {product?.price}{" "}
                       <span className="text-xs text-gray-500">FDj</span>
                     </p>
+                    {product?.oldPrice && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className="text-xs text-gray-400 line-through">
+                          {product.oldPrice} FDj
+                        </span>
+                        <span className="text-xs font-bold text-red-500">
+                          -
+                          {Math.round(
+                            ((product.oldPrice - product.price) /
+                              product.oldPrice) *
+                              100,
+                          )}
+                          %
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="bg-gray-50 rounded-lg p-2">
                     <p className="text-xs text-gray-500 mb-0.5">Vendus</p>

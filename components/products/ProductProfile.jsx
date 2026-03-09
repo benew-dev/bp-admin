@@ -98,6 +98,22 @@ const ProductProfile = ({ data }) => {
                 <div className="text-base sm:text-xl lg:text-2xl font-bold text-purple-600 wrap-break-words">
                   {formatPrice(product?.price || 0)}
                 </div>
+                {product?.oldPrice && (
+                  <>
+                    <div className="text-xs text-slate-400 line-through mt-0.5">
+                      {formatPrice(product.oldPrice)}
+                    </div>
+                    <div className="text-xs font-bold text-red-500 mt-0.5">
+                      -
+                      {Math.round(
+                        ((product.oldPrice - product.price) /
+                          product.oldPrice) *
+                          100,
+                      )}
+                      %
+                    </div>
+                  </>
+                )}
                 <div className="text-xs text-purple-700 uppercase font-semibold mt-1">
                   Prix
                 </div>

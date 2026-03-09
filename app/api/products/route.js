@@ -163,15 +163,25 @@ export async function POST(req) {
       );
     }
 
-    // Créer le produit (le middleware pre-save du modèle fera aussi les validations)
+    if (body.oldPrice && Number(body.oldPrice) <= Number(body.price)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "L'ancien prix doit être supérieur au prix actuel",
+        },
+        { status: 400 },
+      );
+    }
+
     const product = await Product.create({
       name: body.name,
       description: body.description,
       price: body.price,
+      oldPrice: body.oldPrice ? Number(body.oldPrice) : null,
       stock: body.stock,
       type: body.type,
       category: body.category,
-      isActive: false, // Par défaut inactif jusqu'à l'ajout d'images
+      isActive: false,
     });
 
     // Populate pour renvoyer les données complètes

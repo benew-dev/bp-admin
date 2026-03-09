@@ -24,6 +24,7 @@ const NewProduct = ({ initialTypes = [], initialCategories = [] }) => {
     name: "",
     description: "",
     price: "",
+    oldPrice: "",
     stock: "",
     type: arrayHasData(initialTypes) ? "" : initialTypes[0]?._id || "",
     category: "",
@@ -61,7 +62,7 @@ const NewProduct = ({ initialTypes = [], initialCategories = [] }) => {
     }
   }, [product.type, initialCategories]);
 
-  const { name, description, price, stock, type, category } = product;
+  const { name, description, price, oldPrice, stock, type, category } = product;
 
   const onChange = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
@@ -81,9 +82,15 @@ const NewProduct = ({ initialTypes = [], initialCategories = [] }) => {
       return;
     }
 
+    if (oldPrice && Number(oldPrice) <= Number(price)) {
+      toast.error("L'ancien prix doit être supérieur au prix actuel");
+      return;
+    }
+
     const productData = {
       ...product,
       price: Number(price),
+      oldPrice: oldPrice ? Number(oldPrice) : null,
       stock: Number(stock),
     };
     newProduct(productData);
@@ -262,6 +269,42 @@ const NewProduct = ({ initialTypes = [], initialCategories = [] }) => {
                     onChange={onChange}
                     placeholder="5000"
                     required
+                    min="0"
+                    step="1"
+                    className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-slate-200 rounded-lg sm:rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-slate-700"
+                  />
+                </div>
+              </div>
+
+              <div className="group">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">
+                  Ancien prix (FDj)
+                  <span className="ml-2 text-xs font-normal text-slate-400">
+                    optionnel — pour afficher une promotion
+                  </span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                    <svg
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="number"
+                    name="oldPrice"
+                    value={oldPrice}
+                    onChange={onChange}
+                    placeholder="Ex: 8000"
                     min="0"
                     step="1"
                     className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-slate-200 rounded-lg sm:rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-slate-700"

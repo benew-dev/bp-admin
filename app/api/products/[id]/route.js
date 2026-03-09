@@ -173,6 +173,26 @@ export async function PUT(req, { params }) {
       }
     }
 
+    // Valider oldPrice si fourni
+    if (
+      body.oldPrice !== undefined &&
+      body.oldPrice !== null &&
+      body.oldPrice !== ""
+    ) {
+      if (Number(body.oldPrice) <= Number(body.price || product.price)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "L'ancien prix doit être supérieur au prix actuel",
+          },
+          { status: 400 },
+        );
+      }
+      body.oldPrice = Number(body.oldPrice);
+    } else if (body.oldPrice === "" || body.oldPrice === 0) {
+      body.oldPrice = null;
+    }
+
     // Mettre à jour le produit
     product = await Product.findByIdAndUpdate(id, body, {
       new: true,

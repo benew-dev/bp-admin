@@ -31,6 +31,12 @@ const productSchema = new mongoose.Schema(
       set: (val) => Math.round(val * 100) / 100, // Arrondir à 2 décimales
       index: true,
     },
+    oldPrice: {
+      type: Number,
+      default: null,
+      min: [0, "L'ancien prix ne peut pas être négatif"],
+      set: (val) => (val ? Math.round(val * 100) / 100 : null),
+    },
     images: [
       {
         public_id: {
