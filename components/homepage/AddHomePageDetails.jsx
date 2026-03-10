@@ -202,14 +202,7 @@ const getInitialState = () => ({
 
   // Nouveautés
   newArrivalsSection: {
-    isActive: true,
-    title: "Nouveautés de",
-    highlight: "la semaine",
-    eyebrow: "Vient d'arriver",
-    description:
-      "Découvrez nos dernières arrivées, sélectionnées avec soin pour vous.",
     videos: [],
-    limit: 3,
   },
 
   // Avantages

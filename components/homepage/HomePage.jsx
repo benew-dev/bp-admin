@@ -506,10 +506,6 @@ const NewArrivalsSection = ({ data, onDelete, deleting }) => {
                       <p className="text-xs font-semibold text-slate-800 truncate">
                         {item.title || `Vidéo ${i + 1}`}
                       </p>
-                      <Badge
-                        text={item.badge || "—"}
-                        color={item.accentColor || "orange"}
-                      />
                     </div>
                   </div>
                   {item.video?.url ? (

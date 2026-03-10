@@ -7,9 +7,6 @@ import { toast } from "react-toastify";
 import { CldUploadWidget, CldVideoPlayer } from "next-cloudinary";
 import "next-cloudinary/dist/cld-video-player.css";
 
-const ARRIVAL_BADGES = ["Nouveau", "Tendance", "Exclusif", "Limited"];
-const ACCENT_COLORS = ["orange", "pink", "purple"];
-
 const NewArrivalVideoCard = ({ item, index, onRemove, onChange }) => {
   const handleUploadSuccess = (result) => {
     onChange(index, "video", {
@@ -78,28 +75,6 @@ const NewArrivalVideoCard = ({ item, index, onRemove, onChange }) => {
           maxLength={100}
           className="sm:col-span-1 px-3 py-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-sm"
         />
-        <select
-          value={item.badge || "Nouveau"}
-          onChange={(e) => onChange(index, "badge", e.target.value)}
-          className="px-2 py-2 border-2 border-slate-200 rounded-lg outline-none text-sm"
-        >
-          {ARRIVAL_BADGES.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
-        <select
-          value={item.accentColor || "orange"}
-          onChange={(e) => onChange(index, "accentColor", e.target.value)}
-          className="px-2 py-2 border-2 border-slate-200 rounded-lg outline-none text-sm"
-        >
-          {ACCENT_COLORS.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
       </div>
 
       {/* Zone vidéo */}

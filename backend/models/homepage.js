@@ -199,23 +199,12 @@ const newArrivalItemSchema = new mongoose.Schema({
   title: {
     type: String,
     trim: true,
-    maxLength: [100, "Le titre ne peut pas dépasser 100 caractères"],
-  },
-  badge: {
-    type: String,
-    enum: ["Nouveau", "Tendance", "Exclusif", "Limited"],
-    default: "Nouveau",
-  },
-  accentColor: {
-    type: String,
-    enum: ["orange", "pink", "purple"],
-    default: "orange",
+    maxLength: [60, "Le titre ne peut pas dépasser 60 caractères"],
   },
   video: {
     public_id: { type: String, default: null },
     url: { type: String, default: null },
   },
-  order: { type: Number, default: 0 },
 });
 
 const newArrivalsSectionSchema = new mongoose.Schema({
@@ -581,7 +570,8 @@ homePageSchema.statics.getPopulatedHomePage = async function () {
   return this.findOne()
     .populate({
       path: "featuredSection.products.product",
-      select: "name slug price images stock sold category type ratings",
+      select:
+        "name slug price oldPrice images stock sold category type ratings",
       populate: [
         { path: "category", select: "categoryName slug" },
         { path: "type", select: "nom slug" },
