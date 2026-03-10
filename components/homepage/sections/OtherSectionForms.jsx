@@ -2,9 +2,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // NewArrivalsSectionForm
 // ─────────────────────────────────────────────────────────────────────────────
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { CldUploadWidget, CldVideoPlayer } from "next-cloudinary";
+import "next-cloudinary/dist/cld-video-player.css";
 
 const ARRIVAL_BADGES = ["Nouveau", "Tendance", "Exclusif", "Limited"];
 const ACCENT_COLORS = ["orange", "pink", "purple"];
@@ -112,69 +114,12 @@ const ProductPickerModal = ({ onSelect, selectedIds = [], onClose }) => {
 // NewArrivalItemCard — item avec gestion vidéo
 // ─────────────────────────────────────────────────────────────────────────────
 const NewArrivalItemCard = ({ item, index, name, img, onRemove, onChange }) => {
-  const [uploadingVideo, setUploadingVideo] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const handleVideoUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validation locale
-    const allowedTypes = ["video/mp4", "video/webm", "video/quicktime"];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error("Format vidéo non supporté. Utilisez MP4, WebM ou MOV.");
-      return;
-    }
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("La vidéo ne doit pas dépasser 50MB.");
-      return;
-    }
-
-    try {
-      setUploadingVideo(true);
-
-      // Récupérer la signature vidéo
-      const { data: config } = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/cloudinary/sign`,
-      );
-
-      // Upload direct vers Cloudinary
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("api_key", config.apiKey);
-      formData.append("timestamp", config.uploadParams.timestamp);
-      formData.append("signature", config.signature);
-      formData.append("folder", config.uploadParams.folder);
-      formData.append("resource_type", "video");
-
-      const cloudRes = await axios.post(
-        `https://api.cloudinary.com/v1_1/${config.cloudName}/video/upload`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          onUploadProgress: (progressEvent) => {
-            const percent = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total,
-            );
-            if (percent % 25 === 0) {
-              toast.info(`Upload vidéo : ${percent}%`, { toastId: "vid-prog" });
-            }
-          },
-        },
-      );
-
-      onChange(index, "video", {
-        public_id: cloudRes.data.public_id,
-        url: cloudRes.data.secure_url,
-      });
-      toast.success("Vidéo uploadée avec succès !");
-    } catch (err) {
-      console.error("Video upload error:", err);
-      toast.error("Échec de l'upload vidéo.");
-    } finally {
-      setUploadingVideo(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+  const handleVideoUploadSuccess = (result) => {
+    onChange(index, "video", {
+      public_id: result.info.public_id,
+      url: result.info.secure_url,
+    });
+    toast.success("Vidéo uploadée avec succès !");
   };
 
   const handleRemoveVideo = () => {
@@ -269,33 +214,27 @@ const NewArrivalItemCard = ({ item, index, name, img, onRemove, onChange }) => {
           </svg>
           Vidéo lifestyle{" "}
           <span className="font-normal text-slate-400">
-            (optionnel · MP4/WebM/MOV · max 50MB)
+            (optionnel · MP4/WebM/MOV · max 100MB)
           </span>
         </p>
 
-        {item.video?.url ? (
-          <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
-            <video
-              src={item.video.url}
-              muted
-              loop
-              playsInline
-              className="w-full h-full object-cover"
-              onMouseEnter={(e) => e.target.play()}
-              onMouseLeave={(e) => {
-                e.target.pause();
-                e.target.currentTime = 0;
-              }}
+        {item.video?.public_id ? (
+          /* ── Prévisualisation avec CldVideoPlayer ── */
+          <div className="relative rounded-lg overflow-hidden">
+            <CldVideoPlayer
+              id={`video-player-${index}`}
+              src={item.video.public_id}
+              width="1920"
+              height="1080"
+              className="w-full rounded-lg"
+              colors={{ accent: "#6366f1", base: "#1e293b", text: "#f8fafc" }}
+              logo={false}
             />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30">
-              <span className="text-white text-xs font-medium bg-black/50 px-2 py-1 rounded">
-                Survolez pour prévisualiser
-              </span>
-            </div>
             <button
               type="button"
               onClick={handleRemoveVideo}
-              className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md"
+              className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md z-10"
+              title="Supprimer la vidéo"
             >
               <svg
                 className="w-3.5 h-3.5"
@@ -313,49 +252,61 @@ const NewArrivalItemCard = ({ item, index, name, img, onRemove, onChange }) => {
             </button>
           </div>
         ) : (
-          <div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="video/mp4,video/webm,video/quicktime"
-              onChange={handleVideoUpload}
-              className="hidden"
-              id={`video-upload-${index}`}
-            />
-            <label
-              htmlFor={`video-upload-${index}`}
-              className={`flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed rounded-lg cursor-pointer transition-all text-xs font-medium
-                ${
-                  uploadingVideo
-                    ? "border-indigo-300 bg-indigo-50 text-indigo-400 cursor-not-allowed"
-                    : "border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600"
-                }`}
-            >
-              {uploadingVideo ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
-                  Upload en cours...
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                  Ajouter une vidéo lifestyle
-                </>
-              )}
-            </label>
-          </div>
+          /* ── Upload avec CldUploadWidget ── */
+          <CldUploadWidget
+            signatureEndpoint="/api/cloudinary/sign"
+            options={{
+              resourceType: "video",
+              folder: "buyitnow/homepage/videos",
+              clientAllowedFormats: ["mp4", "webm", "mov"],
+              maxFileSize: 100000000,
+              sources: ["local"],
+              multiple: false,
+              showAdvancedOptions: false,
+              styles: {
+                palette: {
+                  window: "#ffffff",
+                  sourceBg: "#f8fafc",
+                  windowBorder: "#e2e8f0",
+                  tabIcon: "#6366f1",
+                  inactiveTabIcon: "#94a3b8",
+                  menuIcons: "#6366f1",
+                  link: "#6366f1",
+                  action: "#6366f1",
+                  inProgress: "#6366f1",
+                  complete: "#22c55e",
+                  error: "#ef4444",
+                  textDark: "#1e293b",
+                  textLight: "#ffffff",
+                },
+              },
+            }}
+            onSuccess={handleVideoUploadSuccess}
+            onError={() => toast.error("Échec de l'upload vidéo.")}
+          >
+            {({ open }) => (
+              <button
+                type="button"
+                onClick={() => open()}
+                className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 rounded-lg transition-all text-xs font-medium text-slate-500 hover:text-indigo-600"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                Ajouter une vidéo lifestyle
+              </button>
+            )}
+          </CldUploadWidget>
         )}
       </div>
     </div>
