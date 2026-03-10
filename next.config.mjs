@@ -130,11 +130,12 @@ const nextConfig = {
             value: `
               default-src 'self' blob:;
               script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://upload-widget.cloudinary.com https://widget.cloudinary.com https://res.cloudinary.com https://cdnjs.cloudflare.com  https://unpkg.com;
-              style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+              style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
               img-src 'self' blob: data: https://res.cloudinary.com https://*.cloudinary.com;
               font-src 'self' data: https://cdnjs.cloudflare.com;
-              connect-src 'self' blob: https://res.cloudinary.com https://api.cloudinary.com https://upload-widget.cloudinary.com https://widget.cloudinary.com ${process.env.NODE_ENV === "production" ? "https://*.sentry.io" : ""};
+              connect-src 'self' blob: https://res.cloudinary.com https://api.cloudinary.com https://upload-widget.cloudinary.com https://widget.cloudinary.com https://analytics-api-s.cloudinary.com https://video-analytics-api.cloudinary.com https://unpkg.com https://*.sentry.io;
               frame-src 'self' https://upload-widget.cloudinary.com https://widget.cloudinary.com;
+              media-src 'self' https://res.cloudinary.com;
               worker-src 'self' blob:;
               frame-ancestors 'none';
               base-uri 'self';
