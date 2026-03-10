@@ -39,13 +39,12 @@ const productSchema = new mongoose.Schema(
     },
     images: [
       {
-        public_id: {
+        public_id: { type: String, required: true },
+        url: { type: String, required: true },
+        type: {
           type: String,
-          required: true,
-        },
-        url: {
-          type: String,
-          required: true,
+          enum: ["image", "video"],
+          default: "image",
         },
       },
     ],
