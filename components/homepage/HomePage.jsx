@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 "use client";
 
-import { CldImage } from "next-cloudinary";
 import Link from "next/link";
 import { useState, useContext } from "react";
 import HomePageContext from "@/context/HomePageContext";
