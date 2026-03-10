@@ -7,6 +7,9 @@ import { toast } from "react-toastify";
 import { CldUploadWidget, CldVideoPlayer } from "next-cloudinary";
 import "next-cloudinary/dist/cld-video-player.css";
 
+const ARRIVAL_BADGES = ["Nouveau", "Tendance", "Exclusif", "Limited"];
+const ACCENT_COLORS = ["orange", "pink", "purple"];
+
 const NewArrivalVideoCard = ({ item, index, onRemove, onChange }) => {
   const handleUploadSuccess = (result) => {
     onChange(index, "video", {
