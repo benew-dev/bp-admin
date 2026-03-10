@@ -129,7 +129,7 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: `
               default-src 'self' blob:;
-              script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://upload-widget.cloudinary.com https://widget.cloudinary.com https://res.cloudinary.com https://cdnjs.cloudflare.com;
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://upload-widget.cloudinary.com https://widget.cloudinary.com https://res.cloudinary.com https://cdnjs.cloudflare.com  https://unpkg.com;
               style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
               img-src 'self' blob: data: https://res.cloudinary.com https://*.cloudinary.com;
               font-src 'self' data: https://cdnjs.cloudflare.com;
