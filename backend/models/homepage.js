@@ -195,17 +195,20 @@ const categoriesSectionSchema = new mongoose.Schema({
 // SECTION 3: NOUVEAUTÉS
 // ============================================
 
-const newArrivalItemSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    trim: true,
-    maxLength: [60, "Le titre ne peut pas dépasser 60 caractères"],
+const newArrivalItemSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      trim: true,
+      maxLength: [60, "Le titre ne peut pas dépasser 60 caractères"],
+    },
+    video: {
+      public_id: { type: String, default: null },
+      url: { type: String, default: null },
+    },
   },
-  video: {
-    public_id: { type: String, default: null },
-    url: { type: String, default: null },
-  },
-});
+  { _id: false },
+);
 
 const newArrivalsSectionSchema = new mongoose.Schema({
   isActive: {
