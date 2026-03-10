@@ -68,17 +68,6 @@ export async function PUT(req, { params }) {
         }
       }
 
-      if (sectionKey === "newArrivalsSection" && body.products?.length) {
-        for (const item of body.products) {
-          if (!item.product) {
-            return NextResponse.json(
-              { success: false, message: "Chaque produit doit avoir un ID" },
-              { status: 400 },
-            );
-          }
-        }
-      }
-
       if (sectionKey === "advantagesSection" && body.advantages?.length > 8) {
         return NextResponse.json(
           { success: false, message: "Maximum 8 avantages autorisés" },

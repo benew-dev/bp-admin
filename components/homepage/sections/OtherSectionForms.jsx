@@ -2,46 +2,32 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // NewArrivalsSectionForm
 // ─────────────────────────────────────────────────────────────────────────────
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React from "react";
 import { toast } from "react-toastify";
 import { CldUploadWidget, CldVideoPlayer } from "next-cloudinary";
 import "next-cloudinary/dist/cld-video-player.css";
 
-const ARRIVAL_BADGES = ["Nouveau", "Tendance", "Exclusif", "Limited"];
-const ACCENT_COLORS = ["orange", "pink", "purple"];
+const NewArrivalVideoCard = ({ item, index, onRemove, onChange }) => {
+  const handleUploadSuccess = (result) => {
+    onChange(index, "video", {
+      public_id: result.info.public_id,
+      url: result.info.secure_url,
+    });
+    toast.success("Vidéo uploadée !");
+  };
 
-const ProductPickerModal = ({ onSelect, selectedIds = [], onClose }) => {
-  const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/products`)
-      .then(({ data }) => setProducts(data?.products || data?.data || []))
-      .catch(() => toast.error("Impossible de charger les produits"))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const filtered = products.filter((p) =>
-    p.name?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const handleRemoveVideo = () => {
+    onChange(index, "video", { public_id: null, url: null });
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between p-5 border-b border-slate-200">
-          <h3 className="text-lg font-bold text-slate-800">
-            Sélectionner un produit
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100"
-          >
+    <div className="p-4 bg-white border-2 border-slate-200 rounded-xl space-y-3">
+      {/* En-tête de la carte */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center">
             <svg
-              className="w-5 h-5 text-slate-500"
+              className="w-3.5 h-3.5 text-indigo-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -50,135 +36,18 @@ const ProductPickerModal = ({ onSelect, selectedIds = [], onClose }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+                d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
               />
             </svg>
-          </button>
-        </div>
-        <div className="p-4 border-b border-slate-100">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher..."
-            className="w-full px-4 py-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-sm"
-          />
-        </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
-          {loading ? (
-            <p className="text-center py-8 text-slate-400 text-sm">
-              Chargement...
-            </p>
-          ) : (
-            filtered.map((p) => {
-              const isSelected = selectedIds.includes(p._id);
-              return (
-                <button
-                  key={p._id}
-                  type="button"
-                  onClick={() => onSelect(p)}
-                  disabled={isSelected}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${isSelected ? "border-green-300 bg-green-50 opacity-60 cursor-not-allowed" : "border-slate-200 hover:border-indigo-400 hover:bg-indigo-50"}`}
-                >
-                  <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden shrink-0">
-                    {p.images?.[0]?.url ? (
-                      <img
-                        src={p.images[0].url}
-                        alt={p.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-800 text-sm truncate">
-                      {p.name}
-                    </p>
-                    <p className="text-xs text-slate-500">{p.price} DJF</p>
-                  </div>
-                  {isSelected && (
-                    <span className="text-xs text-green-600 font-medium">
-                      Déjà ajouté
-                    </span>
-                  )}
-                </button>
-              );
-            })
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// NewArrivalItemCard — item avec gestion vidéo
-// ─────────────────────────────────────────────────────────────────────────────
-const NewArrivalItemCard = ({ item, index, name, img, onRemove, onChange }) => {
-  const handleVideoUploadSuccess = (result) => {
-    onChange(index, "video", {
-      public_id: result.info.public_id,
-      url: result.info.secure_url,
-    });
-    toast.success("Vidéo uploadée avec succès !");
-  };
-
-  const handleRemoveVideo = () => {
-    onChange(index, "video", { public_id: null, url: null });
-    toast.success("Vidéo supprimée.");
-  };
-
-  return (
-    <div className="p-3 bg-white border-2 border-slate-200 rounded-xl space-y-3">
-      {/* Ligne produit */}
-      <div className="flex items-start gap-3">
-        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0">
-          {img && (
-            <img src={img} alt={name} className="w-full h-full object-cover" />
-          )}
-        </div>
-        <div className="flex-1 min-w-0 space-y-2">
-          <p className="font-semibold text-slate-800 text-sm truncate">
-            {name}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <select
-              value={item.badge || "Nouveau"}
-              onChange={(e) => onChange(index, "badge", e.target.value)}
-              className="text-xs px-2 py-1 border border-slate-200 rounded-lg outline-none"
-            >
-              {ARRIVAL_BADGES.map((b) => (
-                <option key={b} value={b}>
-                  {b}
-                </option>
-              ))}
-            </select>
-            <select
-              value={item.accentColor || "orange"}
-              onChange={(e) => onChange(index, "accentColor", e.target.value)}
-              className="text-xs px-2 py-1 border border-slate-200 rounded-lg outline-none"
-            >
-              {ACCENT_COLORS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
           </div>
-          <textarea
-            rows={2}
-            value={item.customDescription || ""}
-            onChange={(e) =>
-              onChange(index, "customDescription", e.target.value)
-            }
-            placeholder="Description personnalisée (optionnel)"
-            className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg outline-none resize-none"
-            maxLength={200}
-          />
+          <span className="text-sm font-semibold text-slate-700">
+            Vidéo {index + 1}
+          </span>
         </div>
         <button
           type="button"
           onClick={() => onRemove(index)}
-          className="w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+          className="w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg transition-colors"
         >
           <svg
             className="w-4 h-4"
@@ -196,48 +65,113 @@ const NewArrivalItemCard = ({ item, index, name, img, onRemove, onChange }) => {
         </button>
       </div>
 
-      {/* Zone vidéo */}
-      <div className="border-t border-slate-100 pt-3">
-        <p className="text-xs font-semibold text-slate-600 mb-2 flex items-center gap-1.5">
-          <svg
-            className="w-3.5 h-3.5 text-slate-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-            />
-          </svg>
-          Vidéo lifestyle{" "}
-          <span className="font-normal text-slate-400">
-            (optionnel · MP4/WebM/MOV · max 100MB)
-          </span>
-        </p>
+      {/* Métadonnées : titre + badge + couleur */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <input
+          type="text"
+          value={item.title || ""}
+          onChange={(e) => onChange(index, "title", e.target.value)}
+          placeholder="Titre de la vidéo"
+          maxLength={100}
+          className="sm:col-span-1 px-3 py-2 border-2 border-slate-200 rounded-lg focus:border-indigo-500 outline-none text-sm"
+        />
+        <select
+          value={item.badge || "Nouveau"}
+          onChange={(e) => onChange(index, "badge", e.target.value)}
+          className="px-2 py-2 border-2 border-slate-200 rounded-lg outline-none text-sm"
+        >
+          {ARRIVAL_BADGES.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+        <select
+          value={item.accentColor || "orange"}
+          onChange={(e) => onChange(index, "accentColor", e.target.value)}
+          className="px-2 py-2 border-2 border-slate-200 rounded-lg outline-none text-sm"
+        >
+          {ACCENT_COLORS.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        {item.video?.public_id ? (
-          /* ── Prévisualisation avec CldVideoPlayer ── */
-          <div className="relative rounded-lg overflow-hidden">
-            <CldVideoPlayer
-              id={`video-player-${index}`}
-              src={item.video.public_id}
-              width="1920"
-              height="1080"
-              className="w-full rounded-lg"
-              colors={{ accent: "#6366f1", base: "#1e293b", text: "#f8fafc" }}
-              logo={false}
-            />
+      {/* Zone vidéo */}
+      {item.video?.public_id ? (
+        <div className="relative rounded-lg overflow-hidden">
+          <CldVideoPlayer
+            id={`new-arrival-player-${index}`}
+            src={item.video.public_id}
+            width="1920"
+            height="1080"
+            className="w-full rounded-lg"
+            colors={{ accent: "#6366f1", base: "#1e293b", text: "#f8fafc" }}
+            logo={false}
+          />
+          <button
+            type="button"
+            onClick={handleRemoveVideo}
+            className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md z-10"
+            title="Supprimer la vidéo"
+          >
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      ) : (
+        <CldUploadWidget
+          signatureEndpoint="/api/cloudinary/sign"
+          options={{
+            resourceType: "video",
+            folder: "buyitnow/homepage/videos",
+            clientAllowedFormats: ["mp4", "webm", "mov"],
+            maxFileSize: 100000000,
+            sources: ["local"],
+            multiple: false,
+            showAdvancedOptions: false,
+            styles: {
+              palette: {
+                window: "#ffffff",
+                sourceBg: "#f8fafc",
+                windowBorder: "#e2e8f0",
+                tabIcon: "#6366f1",
+                inactiveTabIcon: "#94a3b8",
+                menuIcons: "#6366f1",
+                link: "#6366f1",
+                action: "#6366f1",
+                inProgress: "#6366f1",
+                complete: "#22c55e",
+                error: "#ef4444",
+                textDark: "#1e293b",
+                textLight: "#ffffff",
+              },
+            },
+          }}
+          onSuccess={handleUploadSuccess}
+          onError={() => toast.error("Échec de l'upload vidéo.")}
+        >
+          {({ open }) => (
             <button
               type="button"
-              onClick={handleRemoveVideo}
-              className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md z-10"
-              title="Supprimer la vidéo"
+              onClick={() => open()}
+              className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 rounded-lg transition-all text-sm font-medium text-slate-500 hover:text-indigo-600"
             >
               <svg
-                className="w-3.5 h-3.5"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -246,111 +180,59 @@ const NewArrivalItemCard = ({ item, index, name, img, onRemove, onChange }) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                 />
               </svg>
+              Cliquer pour uploader une vidéo
+              <span className="text-xs text-slate-400 font-normal">
+                (MP4 · WebM · MOV · max 100MB)
+              </span>
             </button>
-          </div>
-        ) : (
-          /* ── Upload avec CldUploadWidget ── */
-          <CldUploadWidget
-            signatureEndpoint="/api/cloudinary/sign"
-            options={{
-              resourceType: "video",
-              folder: "buyitnow/homepage/videos",
-              clientAllowedFormats: ["mp4", "webm", "mov"],
-              maxFileSize: 100000000,
-              sources: ["local"],
-              multiple: false,
-              showAdvancedOptions: false,
-              styles: {
-                palette: {
-                  window: "#ffffff",
-                  sourceBg: "#f8fafc",
-                  windowBorder: "#e2e8f0",
-                  tabIcon: "#6366f1",
-                  inactiveTabIcon: "#94a3b8",
-                  menuIcons: "#6366f1",
-                  link: "#6366f1",
-                  action: "#6366f1",
-                  inProgress: "#6366f1",
-                  complete: "#22c55e",
-                  error: "#ef4444",
-                  textDark: "#1e293b",
-                  textLight: "#ffffff",
-                },
-              },
-            }}
-            onSuccess={handleVideoUploadSuccess}
-            onError={() => toast.error("Échec de l'upload vidéo.")}
-          >
-            {({ open }) => (
-              <button
-                type="button"
-                onClick={() => open()}
-                className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 rounded-lg transition-all text-xs font-medium text-slate-500 hover:text-indigo-600"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
-                Ajouter une vidéo lifestyle
-              </button>
-            )}
-          </CldUploadWidget>
-        )}
-      </div>
+          )}
+        </CldUploadWidget>
+      )}
     </div>
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// NewArrivalsSectionForm
+// ─────────────────────────────────────────────────────────────────────────────
 export const NewArrivalsSectionForm = ({ value, onChange }) => {
-  const [showModal, setShowModal] = useState(false);
   const update = (field, val) => onChange({ ...value, [field]: val });
 
-  const selectedIds = (value.products || []).map((p) =>
-    typeof p.product === "object" ? p.product._id : p.product,
-  );
+  const videos = value.videos || [];
+  const limit = value.limit || 3;
 
-  const handleAdd = (product) => {
-    update("products", [
-      ...(value.products || []),
+  const handleAdd = () => {
+    if (videos.length >= limit) return;
+    update("videos", [
+      ...videos,
       {
-        product: product._id,
-        productData: product,
+        title: "",
         badge: "Nouveau",
         accentColor: "orange",
-        order: (value.products || []).length,
+        video: { public_id: null, url: null },
+        order: videos.length,
       },
     ]);
-    setShowModal(false);
-    toast.success(`"${product.name}" ajouté`);
   };
 
   const handleRemove = (i) =>
     update(
-      "products",
-      (value.products || []).filter((_, idx) => idx !== i),
+      "videos",
+      videos.filter((_, idx) => idx !== i),
     );
 
   const handleItemChange = (i, field, val) => {
-    const updated = [...(value.products || [])];
+    const updated = [...videos];
     updated[i] = { ...updated[i], [field]: val };
-    update("products", updated);
+    update("videos", updated);
   };
 
   return (
     <div className="space-y-6">
-      {/* Toggle */}
+      {/* Toggle actif/inactif */}
       <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
         <div>
           <p className="font-semibold text-slate-800 text-sm">Section active</p>
@@ -369,12 +251,12 @@ export const NewArrivalsSectionForm = ({ value, onChange }) => {
         </button>
       </div>
 
-      {/* Textes */}
+      {/* Textes de la section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[
           { label: "Titre", field: "title", placeholder: "Nouveautés de" },
           {
-            label: "Mot mis en avant",
+            label: "Mot en avant",
             field: "highlight",
             placeholder: "la semaine",
           },
@@ -411,19 +293,19 @@ export const NewArrivalsSectionForm = ({ value, onChange }) => {
         </div>
       </div>
 
-      {/* Produits */}
+      {/* Liste des vidéos */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <label className="text-sm font-semibold text-slate-700">
-            Produits{" "}
+            Vidéos{" "}
             <span className="text-xs font-normal text-slate-400">
-              ({(value.products || []).length}/{value.limit || 2} max)
+              ({videos.length}/{limit} max)
             </span>
           </label>
-          {(value.products || []).length < (value.limit || 2) && (
+          {videos.length < limit && (
             <button
               type="button"
-              onClick={() => setShowModal(true)}
+              onClick={handleAdd}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-all"
             >
               <svg
@@ -439,48 +321,64 @@ export const NewArrivalsSectionForm = ({ value, onChange }) => {
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-              Ajouter
+              Ajouter une vidéo
             </button>
           )}
         </div>
 
-        <div className="space-y-3">
-          {(value.products || []).length === 0 ? (
-            <div className="text-center py-8 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-              <p className="text-sm text-slate-400">
-                Aucun produit sélectionné
+        <div className="space-y-4">
+          {videos.length === 0 ? (
+            <div className="text-center py-10 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+              <svg
+                className="w-12 h-12 mx-auto text-slate-300 mb-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+              <p className="text-sm text-slate-400 mb-3">
+                Aucune vidéo ajoutée
               </p>
+              <button
+                type="button"
+                onClick={handleAdd}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-all"
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                Ajouter une première vidéo
+              </button>
             </div>
           ) : (
-            (value.products || []).map((item, i) => {
-              const pd = item.productData || item.product;
-              const name =
-                typeof pd === "object" ? pd.name : `Produit ${i + 1}`;
-              const img = typeof pd === "object" ? pd.images?.[0]?.url : null;
-
-              return (
-                <NewArrivalItemCard
-                  key={i}
-                  item={item}
-                  index={i}
-                  name={name}
-                  img={img}
-                  onRemove={handleRemove}
-                  onChange={handleItemChange}
-                />
-              );
-            })
+            videos.map((item, i) => (
+              <NewArrivalVideoCard
+                key={i}
+                item={item}
+                index={i}
+                onRemove={handleRemove}
+                onChange={handleItemChange}
+              />
+            ))
           )}
         </div>
       </div>
-
-      {showModal && (
-        <ProductPickerModal
-          onSelect={handleAdd}
-          selectedIds={selectedIds}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </div>
   );
 };

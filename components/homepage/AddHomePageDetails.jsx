@@ -208,9 +208,8 @@ const getInitialState = () => ({
     eyebrow: "Vient d'arriver",
     description:
       "Découvrez nos dernières arrivées, sélectionnées avec soin pour vous.",
-    displayMode: "manual",
-    products: [],
-    limit: 2,
+    videos: [],
+    limit: 3,
   },
 
   // Avantages
@@ -369,10 +368,7 @@ const AddHomePageDetails = () => {
         ...formData.categoriesSection,
         categories: cleanCategories(formData.categoriesSection.categories),
       },
-      newArrivalsSection: {
-        ...formData.newArrivalsSection,
-        products: cleanProducts(formData.newArrivalsSection.products),
-      },
+      newArrivalsSection: formData.newArrivalsSection,
       advantagesSection: formData.advantagesSection,
       testimonialsSection: formData.testimonialsSection,
       ctaSection: formData.ctaSection,

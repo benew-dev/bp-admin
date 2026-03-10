@@ -18,7 +18,6 @@ export async function GET(req) {
     const homePage = await HomePage.findOne()
       .sort({ createdAt: -1 })
       .populate("featuredSection.products.product", "name price images")
-      .populate("newArrivalsSection.products.product", "name price images")
       .populate("categoriesSection.categories.category", "categoryName");
 
     return NextResponse.json({
@@ -111,18 +110,14 @@ export async function POST(req) {
     }
 
     // ── Validation newArrivalsSection ─────────────────────────────────────────
-    if (newArrivalsSection?.products?.length) {
-      for (const item of newArrivalsSection.products) {
-        if (!item.product) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: "Chaque nouveauté doit avoir un ID produit",
-            },
-            { status: 400 },
-          );
-        }
-      }
+    if (newArrivalsSection?.videos?.length > (newArrivalsSection?.limit || 6)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Nombre de vidéos dépasse la limite autorisée",
+        },
+        { status: 400 },
+      );
     }
 
     // ── Validation advantagesSection ──────────────────────────────────────────

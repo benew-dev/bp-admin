@@ -196,10 +196,10 @@ const categoriesSectionSchema = new mongoose.Schema({
 // ============================================
 
 const newArrivalItemSchema = new mongoose.Schema({
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-    required: true,
+  title: {
+    type: String,
+    trim: true,
+    maxLength: [100, "Le titre ne peut pas dépasser 100 caractères"],
   },
   badge: {
     type: String,
@@ -211,19 +211,11 @@ const newArrivalItemSchema = new mongoose.Schema({
     enum: ["orange", "pink", "purple"],
     default: "orange",
   },
-  customDescription: {
-    type: String,
-    trim: true,
-    maxLength: [200, "La description ne peut pas dépasser 200 caractères"],
-  },
   video: {
     public_id: { type: String, default: null },
     url: { type: String, default: null },
   },
-  order: {
-    type: Number,
-    default: 0,
-  },
+  order: { type: Number, default: 0 },
 });
 
 const newArrivalsSectionSchema = new mongoose.Schema({
@@ -252,18 +244,8 @@ const newArrivalsSectionSchema = new mongoose.Schema({
       "Découvrez nos dernières arrivées, sélectionnées avec soin pour vous.",
     trim: true,
   },
-  displayMode: {
-    type: String,
-    enum: ["manual", "auto"],
-    default: "manual",
-  },
-  products: [newArrivalItemSchema],
-  limit: {
-    type: Number,
-    default: 2,
-    min: 1,
-    max: 4,
-  },
+  videos: [newArrivalItemSchema],
+  limit: { type: Number, default: 3, min: 1, max: 6 },
 });
 
 // ============================================
@@ -609,15 +591,6 @@ homePageSchema.statics.getPopulatedHomePage = async function () {
       path: "categoriesSection.categories.category",
       select: "categoryName slug type",
       populate: { path: "type", select: "nom slug" },
-    })
-    .populate({
-      path: "newArrivalsSection.products.product",
-      select:
-        "name slug price description images stock sold category type ratings",
-      populate: [
-        { path: "category", select: "categoryName slug" },
-        { path: "type", select: "nom slug" },
-      ],
     })
     .lean();
 };

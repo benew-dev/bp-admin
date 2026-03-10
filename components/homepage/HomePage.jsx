@@ -469,34 +469,42 @@ const NewArrivalsSection = ({ data, onDelete, deleting }) => {
           <Field label="Highlight" value={data.highlight} />
           <Field
             label="Limite"
-            value={data.limit ? `${data.limit} produits` : undefined}
+            value={data.limit ? `${data.limit} vidéos` : undefined}
           />
           <div className="sm:col-span-2">
             <Field label="Description" value={data.description} />
           </div>
         </div>
-        {data.products?.length > 0 && (
+        {data.videos?.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-              Produits ({data.products.length})
+              Vidéos ({data.videos.length})
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {data.products.map((item, i) => (
+              {data.videos.map((item, i) => (
                 <div
                   key={i}
-                  className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2"
+                  className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1"
                 >
                   <div className="flex items-center gap-2">
-                    {item.product?.images?.[0]?.url && (
-                      <img
-                        src={item.product.images[0].url}
-                        alt=""
-                        className="w-10 h-10 rounded-lg object-cover shrink-0"
-                      />
-                    )}
+                    <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0">
+                      <svg
+                        className="w-4 h-4 text-indigo-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-slate-800 truncate">
-                        {item.product?.name || `Produit ${i + 1}`}
+                        {item.title || `Vidéo ${i + 1}`}
                       </p>
                       <Badge
                         text={item.badge || "—"}
@@ -504,10 +512,15 @@ const NewArrivalsSection = ({ data, onDelete, deleting }) => {
                       />
                     </div>
                   </div>
-                  {item.customDescription && (
-                    <p className="text-xs text-slate-500 italic">
-                      {item.customDescription}
-                    </p>
+                  {item.video?.url ? (
+                    <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                      Vidéo uploadée
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic">
+                      Aucune vidéo
+                    </span>
                   )}
                 </div>
               ))}

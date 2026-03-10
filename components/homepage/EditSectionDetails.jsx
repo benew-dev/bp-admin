@@ -144,8 +144,8 @@ const DEFAULT_VALUES = {
     highlight: "",
     eyebrow: "",
     description: "",
-    products: [],
-    limit: 2,
+    videos: [],
+    limit: 3,
   },
   advantagesSection: {
     isActive: true,
@@ -182,9 +182,9 @@ const cleanSectionData = (sectionKey, data) => {
   const cleaned = { ...data };
 
   // Supprimer les champs d'affichage local pour produits
-  if (cleaned.products) {
-    cleaned.products = cleaned.products.map(({ productData, ...item }) => item);
-  }
+  // if (cleaned.products) {
+  //   cleaned.products = cleaned.products.map(({ productData, ...item }) => item);
+  // }
 
   // Supprimer les champs d'affichage local pour catégories
   if (cleaned.categories) {
