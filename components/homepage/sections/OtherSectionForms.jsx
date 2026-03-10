@@ -2,7 +2,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // NewArrivalsSectionForm
 // ─────────────────────────────────────────────────────────────────────────────
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -103,6 +103,260 @@ const ProductPickerModal = ({ onSelect, selectedIds = [], onClose }) => {
             })
           )}
         </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NewArrivalItemCard — item avec gestion vidéo
+// ─────────────────────────────────────────────────────────────────────────────
+const NewArrivalItemCard = ({ item, index, name, img, onRemove, onChange }) => {
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validation locale
+    const allowedTypes = ["video/mp4", "video/webm", "video/quicktime"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Format vidéo non supporté. Utilisez MP4, WebM ou MOV.");
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("La vidéo ne doit pas dépasser 50MB.");
+      return;
+    }
+
+    try {
+      setUploadingVideo(true);
+
+      // Récupérer la signature vidéo
+      const { data: config } = await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/cloudinary/sign`,
+      );
+
+      // Upload direct vers Cloudinary
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", config.apiKey);
+      formData.append("timestamp", config.uploadParams.timestamp);
+      formData.append("signature", config.signature);
+      formData.append("folder", config.uploadParams.folder);
+      formData.append("resource_type", "video");
+
+      const cloudRes = await axios.post(
+        `https://api.cloudinary.com/v1_1/${config.cloudName}/video/upload`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progressEvent) => {
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total,
+            );
+            if (percent % 25 === 0) {
+              toast.info(`Upload vidéo : ${percent}%`, { toastId: "vid-prog" });
+            }
+          },
+        },
+      );
+
+      onChange(index, "video", {
+        public_id: cloudRes.data.public_id,
+        url: cloudRes.data.secure_url,
+      });
+      toast.success("Vidéo uploadée avec succès !");
+    } catch (err) {
+      console.error("Video upload error:", err);
+      toast.error("Échec de l'upload vidéo.");
+    } finally {
+      setUploadingVideo(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveVideo = () => {
+    onChange(index, "video", { public_id: null, url: null });
+    toast.success("Vidéo supprimée.");
+  };
+
+  return (
+    <div className="p-3 bg-white border-2 border-slate-200 rounded-xl space-y-3">
+      {/* Ligne produit */}
+      <div className="flex items-start gap-3">
+        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0">
+          {img && (
+            <img src={img} alt={name} className="w-full h-full object-cover" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0 space-y-2">
+          <p className="font-semibold text-slate-800 text-sm truncate">
+            {name}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <select
+              value={item.badge || "Nouveau"}
+              onChange={(e) => onChange(index, "badge", e.target.value)}
+              className="text-xs px-2 py-1 border border-slate-200 rounded-lg outline-none"
+            >
+              {ARRIVAL_BADGES.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+            <select
+              value={item.accentColor || "orange"}
+              onChange={(e) => onChange(index, "accentColor", e.target.value)}
+              className="text-xs px-2 py-1 border border-slate-200 rounded-lg outline-none"
+            >
+              {ACCENT_COLORS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+          <textarea
+            rows={2}
+            value={item.customDescription || ""}
+            onChange={(e) =>
+              onChange(index, "customDescription", e.target.value)
+            }
+            placeholder="Description personnalisée (optionnel)"
+            className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg outline-none resize-none"
+            maxLength={200}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => onRemove(index)}
+          className="w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Zone vidéo */}
+      <div className="border-t border-slate-100 pt-3">
+        <p className="text-xs font-semibold text-slate-600 mb-2 flex items-center gap-1.5">
+          <svg
+            className="w-3.5 h-3.5 text-slate-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+            />
+          </svg>
+          Vidéo lifestyle{" "}
+          <span className="font-normal text-slate-400">
+            (optionnel · MP4/WebM/MOV · max 50MB)
+          </span>
+        </p>
+
+        {item.video?.url ? (
+          <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
+            <video
+              src={item.video.url}
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+              onMouseEnter={(e) => e.target.play()}
+              onMouseLeave={(e) => {
+                e.target.pause();
+                e.target.currentTime = 0;
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30">
+              <span className="text-white text-xs font-medium bg-black/50 px-2 py-1 rounded">
+                Survolez pour prévisualiser
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleRemoveVideo}
+              className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md"
+            >
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/mp4,video/webm,video/quicktime"
+              onChange={handleVideoUpload}
+              className="hidden"
+              id={`video-upload-${index}`}
+            />
+            <label
+              htmlFor={`video-upload-${index}`}
+              className={`flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed rounded-lg cursor-pointer transition-all text-xs font-medium
+                ${
+                  uploadingVideo
+                    ? "border-indigo-300 bg-indigo-50 text-indigo-400 cursor-not-allowed"
+                    : "border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600"
+                }`}
+            >
+              {uploadingVideo ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                  Upload en cours...
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  Ajouter une vidéo lifestyle
+                </>
+              )}
+            </label>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -254,82 +508,15 @@ export const NewArrivalsSectionForm = ({ value, onChange }) => {
               const img = typeof pd === "object" ? pd.images?.[0]?.url : null;
 
               return (
-                <div
+                <NewArrivalItemCard
                   key={i}
-                  className="flex items-start gap-3 p-3 bg-white border-2 border-slate-200 rounded-xl"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0">
-                    {img && (
-                      <img
-                        src={img}
-                        alt={name}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <p className="font-semibold text-slate-800 text-sm truncate">
-                      {name}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <select
-                        value={item.badge || "Nouveau"}
-                        onChange={(e) =>
-                          handleItemChange(i, "badge", e.target.value)
-                        }
-                        className="text-xs px-2 py-1 border border-slate-200 rounded-lg outline-none"
-                      >
-                        {ARRIVAL_BADGES.map((b) => (
-                          <option key={b} value={b}>
-                            {b}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        value={item.accentColor || "orange"}
-                        onChange={(e) =>
-                          handleItemChange(i, "accentColor", e.target.value)
-                        }
-                        className="text-xs px-2 py-1 border border-slate-200 rounded-lg outline-none"
-                      >
-                        {ACCENT_COLORS.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <textarea
-                      rows={2}
-                      value={item.customDescription || ""}
-                      onChange={(e) =>
-                        handleItemChange(i, "customDescription", e.target.value)
-                      }
-                      placeholder="Description personnalisée (optionnel)"
-                      className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg outline-none resize-none"
-                      maxLength={200}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(i)}
-                    className="w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                  item={item}
+                  index={i}
+                  name={name}
+                  img={img}
+                  onRemove={handleRemove}
+                  onChange={handleItemChange}
+                />
               );
             })
           )}

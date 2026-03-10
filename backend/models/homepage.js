@@ -216,6 +216,10 @@ const newArrivalItemSchema = new mongoose.Schema({
     trim: true,
     maxLength: [200, "La description ne peut pas dépasser 200 caractères"],
   },
+  video: {
+    public_id: { type: String, default: null },
+    url: { type: String, default: null },
+  },
   order: {
     type: Number,
     default: 0,
