@@ -5,6 +5,8 @@ import { CldImage } from "next-cloudinary";
 import Link from "next/link";
 import { useState, useContext } from "react";
 import HomePageContext from "@/context/HomePageContext";
+import { CldImage, CldVideoPlayer } from "next-cloudinary";
+import "next-cloudinary/dist/cld-video-player.css";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers UI
@@ -508,14 +510,25 @@ const NewArrivalsSection = ({ data, onDelete, deleting }) => {
                       </p>
                     </div>
                   </div>
-                  {item.video?.url ? (
-                    <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                      Vidéo uploadée
-                    </span>
+                  {item.video?.public_id ? (
+                    <div className="mt-2 rounded-lg overflow-hidden border border-slate-200">
+                      <CldVideoPlayer
+                        id={`admin-preview-${i}`}
+                        src={item.video.public_id}
+                        width="1920"
+                        height="1080"
+                        className="w-full rounded-lg"
+                        colors={{
+                          accent: "#6366f1",
+                          base: "#1e293b",
+                          text: "#f8fafc",
+                        }}
+                        logo={false}
+                      />
+                    </div>
                   ) : (
                     <span className="text-xs text-slate-400 italic">
-                      Aucune vidéo
+                      Aucune vidéo uploadée
                     </span>
                   )}
                 </div>

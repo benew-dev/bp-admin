@@ -188,10 +188,7 @@ export const NewArrivalsSectionForm = ({ value, onChange }) => {
       ...videos,
       {
         title: "",
-        badge: "Nouveau",
-        accentColor: "orange",
         video: { public_id: null, url: null },
-        order: videos.length,
       },
     ]);
   };
