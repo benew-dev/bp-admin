@@ -44,7 +44,7 @@ export async function POST(req) {
 
     const {
       // Hero sections (existant)
-      heroSection,
+      heroSection, // { video, title, subtitle, text }
 
       // Nouvelles sections
       featuredSection,
@@ -57,26 +57,14 @@ export async function POST(req) {
 
     // ── Validation Hero ──────────────────────────────────────────────────────
     // Si une hero section est fournie, valider ses champs
-    if (heroSection) {
-      const { title, subtitle, text, image } = heroSection;
-
-      if (!title || !subtitle || !text || !image) {
-        return NextResponse.json(
-          {
-            success: false,
-            message:
-              "La section hero requiert : titre, sous-titre, texte et image",
-          },
-          { status: 400 },
-        );
-      }
-
-      if (!image.public_id || !image.url) {
-        return NextResponse.json(
-          { success: false, message: "L'image hero est invalide" },
-          { status: 400 },
-        );
-      }
+    if (
+      heroSection?.video &&
+      (!heroSection.video.public_id || !heroSection.video.url)
+    ) {
+      return NextResponse.json(
+        { success: false, message: "La vidéo hero est invalide" },
+        { status: 400 },
+      );
     }
 
     // ── Validation featuredSection ────────────────────────────────────────────
@@ -150,18 +138,7 @@ export async function POST(req) {
       const createData = {};
 
       // Ajouter la hero section si fournie
-      if (heroSection) {
-        createData.sections = [
-          {
-            title: heroSection.title,
-            subtitle: heroSection.subtitle,
-            text: heroSection.text,
-            image: heroSection.image,
-          },
-        ];
-      } else {
-        createData.sections = [];
-      }
+      if (heroSection !== undefined) createData.heroSection = heroSection;
 
       // Ajouter les sections optionnelles si fournies
       if (featuredSection !== undefined)
@@ -191,23 +168,11 @@ export async function POST(req) {
     // ── Mettre à jour le document existant ────────────────────────────────────
 
     // Hero section : ajouter au tableau sections (max 3)
-    if (heroSection) {
-      if (homePage.sections.length >= 3) {
-        return NextResponse.json(
-          {
-            success: false,
-            message:
-              "La page d'accueil a déjà 3 sections hero. Modifiez ou supprimez-en une.",
-          },
-          { status: 400 },
-        );
-      }
-      homePage.sections.push({
-        title: heroSection.title,
-        subtitle: heroSection.subtitle,
-        text: heroSection.text,
-        image: heroSection.image,
-      });
+    if (heroSection !== undefined) {
+      homePage.heroSection = {
+        ...(homePage.heroSection?.toObject?.() ?? {}),
+        ...heroSection,
+      };
     }
 
     // Sections non-hero : remplacement complet (merge)

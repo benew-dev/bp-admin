@@ -13,9 +13,25 @@ import {
   TestimonialsSectionForm,
   CtaSectionForm,
 } from "@/components/homepage/sections/OtherSectionForms";
+import HeroSectionForm from "./sections/HeroSectionForm";
 
 // ── Icônes par section ────────────────────────────────────────────────────────
 const SECTION_ICONS = {
+  heroSection: (
+    <svg
+      className="w-7 h-7 text-white"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+      />
+    </svg>
+  ),
   featuredSection: (
     <svg
       className="w-7 h-7 text-white"
@@ -110,6 +126,7 @@ const SECTION_ICONS = {
 
 // ── Gradients par section ─────────────────────────────────────────────────────
 const SECTION_GRADIENTS = {
+  heroSection: "from-indigo-500 to-purple-500",
   featuredSection: "from-orange-500 to-pink-500",
   categoriesSection: "from-blue-500 to-cyan-500",
   newArrivalsSection: "from-emerald-500 to-teal-500",
@@ -120,6 +137,12 @@ const SECTION_GRADIENTS = {
 
 // ── Valeurs initiales par défaut si la section n'existe pas encore ────────────
 const DEFAULT_VALUES = {
+  heroSection: {
+    video: null,
+    title: "",
+    subtitle: "",
+    text: "",
+  },
   featuredSection: {
     isActive: true,
     title: "",
@@ -178,7 +201,7 @@ const DEFAULT_VALUES = {
 };
 
 // ── Nettoyage du payload avant envoi ─────────────────────────────────────────
-const cleanSectionData = (sectionKey, data) => {
+const cleanSectionData = (data) => {
   const cleaned = { ...data };
 
   // Supprimer les champs d'affichage local pour produits
@@ -246,6 +269,8 @@ const EditSectionDetails = ({ sectionKey, sectionLabel, sectionData }) => {
   const renderForm = () => {
     const props = { value: formData, onChange: setFormData };
     switch (sectionKey) {
+      case "heroSection":
+        return <HeroSectionForm {...props} />;
       case "featuredSection":
         return <FeaturedSectionForm {...props} />;
       case "categoriesSection":

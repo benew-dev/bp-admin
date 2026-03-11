@@ -9,7 +9,8 @@ const EditSectionDetails = dynamic(
   { loading: () => <Loading /> },
 );
 
-const NON_HERO_SECTION_KEYS = [
+const SECTION_KEYS = [
+  "heroSection", // ← ajouter
   "featuredSection",
   "categoriesSection",
   "newArrivalsSection",
@@ -19,6 +20,7 @@ const NON_HERO_SECTION_KEYS = [
 ];
 
 const SECTION_LABELS = {
+  heroSection: "Hero Vidéo",
   featuredSection: "Coups de Cœur",
   categoriesSection: "Catégories",
   newArrivalsSection: "Nouveautés",
@@ -40,7 +42,7 @@ const EditSectionPage = async ({ params }) => {
   const { sectionKey } = await params;
 
   // Vérifier que c'est une clé valide
-  if (!NON_HERO_SECTION_KEYS.includes(sectionKey)) {
+  if (!SECTION_KEYS.includes(sectionKey)) {
     redirect("/admin/homepage");
   }
 

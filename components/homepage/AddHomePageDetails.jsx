@@ -169,10 +169,10 @@ const TABS = [
 const getInitialState = () => ({
   // Hero section (une slide à la fois)
   heroSection: {
+    video: null,
     title: "",
     subtitle: "",
     text: "",
-    image: null,
   },
 
   // Coups de cœur
@@ -307,7 +307,7 @@ const AddHomePageDetails = () => {
       setActiveTab("hero");
       return false;
     }
-    if (!heroSection.image) {
+    if (!heroSection.video) {
       toast.error("L'image du hero est requise");
       setActiveTab("hero");
       return false;

@@ -8,7 +8,8 @@ import {
 import { cloudinary } from "@/backend/utils/cloudinary";
 
 // Clés valides pour les sections non-hero
-const NON_HERO_SECTION_KEYS = [
+const SECTION_KEYS = [
+  "heroSection", // ← ajouté
   "featuredSection",
   "categoriesSection",
   "newArrivalsSection",
@@ -18,7 +19,7 @@ const NON_HERO_SECTION_KEYS = [
 ];
 
 // Détecte si l'id est une sectionKey non-hero ou un ObjectId hero
-const isNonHeroSectionKey = (id) => NON_HERO_SECTION_KEYS.includes(id);
+const isNonHeroSectionKey = (id) => SECTION_KEYS.includes(id);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PUT — Modifier un hero slide OU une section non-hero
@@ -99,54 +100,6 @@ export async function PUT(req, { params }) {
         data: homePage,
       });
     }
-
-    // ── CAS 2 : Hero slide (ObjectId dans sections[]) ─────────────────────────
-    const { title, subtitle, text, image } = body;
-
-    if (!title || !subtitle || !text || !image) {
-      return NextResponse.json(
-        { success: false, message: "Tous les champs hero sont requis" },
-        { status: 400 },
-      );
-    }
-
-    if (!image.public_id || !image.url) {
-      return NextResponse.json(
-        { success: false, message: "L'image est invalide" },
-        { status: 400 },
-      );
-    }
-
-    const section = homePage.sections.id(id);
-
-    if (!section) {
-      return NextResponse.json(
-        { success: false, message: "Section hero non trouvée" },
-        { status: 404 },
-      );
-    }
-
-    // Supprimer l'ancienne image Cloudinary si elle a changé
-    if (section.image.public_id !== image.public_id) {
-      try {
-        await cloudinary.v2.uploader.destroy(section.image.public_id);
-      } catch (err) {
-        console.error("Error deleting old Cloudinary image:", err);
-      }
-    }
-
-    section.title = title;
-    section.subtitle = subtitle;
-    section.text = text;
-    section.image = image;
-
-    await homePage.save();
-
-    return NextResponse.json({
-      success: true,
-      message: "Section hero mise à jour avec succès",
-      data: homePage,
-    });
   } catch (error) {
     console.error("HomePage PUT Error:", error);
     return NextResponse.json(
@@ -187,32 +140,6 @@ export async function DELETE(req, { params }) {
         data: homePage,
       });
     }
-
-    // ── CAS 2 : Hero slide → suppression du sous-document dans sections[] ─────
-    const section = homePage.sections.id(id);
-
-    if (!section) {
-      return NextResponse.json(
-        { success: false, message: "Section hero non trouvée" },
-        { status: 404 },
-      );
-    }
-
-    // Supprimer l'image Cloudinary
-    try {
-      await cloudinary.v2.uploader.destroy(section.image.public_id);
-    } catch (err) {
-      console.error("Error deleting Cloudinary image:", err);
-    }
-
-    homePage.sections.pull(id);
-    await homePage.save();
-
-    return NextResponse.json({
-      success: true,
-      message: "Section hero supprimée avec succès",
-      data: homePage,
-    });
   } catch (error) {
     console.error("HomePage DELETE Error:", error);
     return NextResponse.json(

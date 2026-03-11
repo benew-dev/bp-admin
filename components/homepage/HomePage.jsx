@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useState, useContext } from "react";
 import HomePageContext from "@/context/HomePageContext";
-import { CldImage, CldVideoPlayer } from "next-cloudinary";
+import { CldVideoPlayer } from "next-cloudinary";
 import "next-cloudinary/dist/cld-video-player.css";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -183,119 +183,67 @@ const UnconfiguredSection = ({ sectionKey, label }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // Section Hero
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroSection = ({ sections, onDelete, deletingId, loading }) => (
-  <SectionCard
-    title={`Hero Slides (${sections.length}/3)`}
-    accentColor="indigo"
-    icon={
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-        />
-      </svg>
-    }
-  >
-    <div className="space-y-4">
-      {sections.map((section, index) => (
-        <div
-          key={section._id}
-          className="border-2 border-slate-200 rounded-xl p-4 bg-slate-50"
+const HeroSection = ({ data, onDelete, deleting }) => {
+  if (!data) return null;
+  return (
+    <SectionCard
+      title="Hero Vidéo"
+      accentColor="indigo"
+      sectionKey="heroSection"
+      onDelete={onDelete}
+      deleting={deleting}
+      icon={
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">
-                  {index + 1}
-                </span>
-              </div>
-              <span className="font-semibold text-slate-700 text-sm">
-                Slide {index + 1}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/admin/homepage/${section._id}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all text-xs font-semibold"
-              >
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-                Modifier
-              </Link>
-              <button
-                onClick={() => onDelete(section._id, section.title)}
-                disabled={loading || deletingId === section._id}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-xs font-semibold disabled:opacity-50"
-              >
-                {deletingId === section._id ? (
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                )}
-                Supprimer
-              </button>
-            </div>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+          />
+        </svg>
+      }
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="Titre" value={data.title} />
+          <Field label="Sous-titre" value={data.subtitle} />
+          <div className="sm:col-span-2">
+            <Field label="Texte" value={data.text} />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-            <Field label="Titre" value={section.title} />
-            <Field label="Sous-titre" value={section.subtitle} />
-            <div className="sm:col-span-2">
-              <Field label="Texte" value={section.text} />
-            </div>
-          </div>
-          {section.image?.public_id && (
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                Image
-              </p>
-              <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video">
-                <CldImage
-                  src={section.image.public_id}
-                  alt={section.title}
-                  width={800}
-                  height={450}
-                  crop="fill"
-                  gravity="center"
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            </div>
-          )}
         </div>
-      ))}
-    </div>
-  </SectionCard>
-);
+        {data.video?.public_id ? (
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+              Vidéo
+            </p>
+            <div className="rounded-xl overflow-hidden border border-slate-200">
+              <CldVideoPlayer
+                id="admin-hero-preview"
+                src={data.video.public_id}
+                width="1920"
+                height="1080"
+                className="w-full rounded-xl"
+                colors={{ accent: "#6366f1", base: "#1e293b", text: "#f8fafc" }}
+                logo={false}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
+            <p className="text-sm text-slate-400 italic">
+              Aucune vidéo configurée
+            </p>
+          </div>
+        )}
+      </div>
+    </SectionCard>
+  );
+};
 
 const FeaturedSection = ({ data, onDelete, deleting }) => {
   if (!data) return null;
@@ -765,22 +713,12 @@ const CtaSection = ({ data, onDelete, deleting }) => {
 // Composant principal
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomePage({ data }) {
-  const { deleteHomePageSection, loading } = useContext(HomePageContext);
-  const [deletingId, setDeletingId] = useState(null);
+  const { deleteHomePageSection } = useContext(HomePageContext);
   const [deletingKey, setDeletingKey] = useState(null);
-
-  const handleDeleteHero = async (sectionId, sectionTitle) => {
-    if (!confirm(`Supprimer la section hero "${sectionTitle}" ?`)) return;
-    try {
-      setDeletingId(sectionId);
-      await deleteHomePageSection(sectionId);
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
   const handleDeleteSection = async (sectionKey) => {
     const labels = {
+      heroSection: "Hero Vidéo", // ← ajouter
       featuredSection: "Coups de Cœur",
       categoriesSection: "Catégories",
       newArrivalsSection: "Nouveautés",
@@ -802,7 +740,7 @@ export default function HomePage({ data }) {
     }
   };
 
-  if (!data || !data.sections || data.sections.length === 0) {
+  if (!data) {
     return (
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
         <div className="text-center py-16">
@@ -881,7 +819,12 @@ export default function HomePage({ data }) {
         </div>
         <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-3 border-b border-slate-100">
           {[
-            { label: "Hero Slides", value: `${data.sections.length}/3` },
+            {
+              label: "Hero Vidéo",
+              value: data.heroSection?.video?.public_id
+                ? "Configuré"
+                : "Non configuré",
+            },
             {
               label: "Coups de cœur",
               value: data.featuredSection
@@ -914,12 +857,15 @@ export default function HomePage({ data }) {
         </div>
       </div>
 
-      <HeroSection
-        sections={data.sections}
-        onDelete={handleDeleteHero}
-        deletingId={deletingId}
-        loading={loading}
-      />
+      {data.heroSection ? (
+        <HeroSection
+          data={data.heroSection}
+          onDelete={handleDeleteSection}
+          deleting={deletingKey}
+        />
+      ) : (
+        <UnconfiguredSection sectionKey="heroSection" label="Hero Vidéo" />
+      )}
 
       <div className="space-y-4">
         {data.featuredSection ? (
