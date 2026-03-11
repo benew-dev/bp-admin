@@ -49,11 +49,12 @@ const EditSectionPage = async ({ params }) => {
   // Récupérer le document homepage complet
   const homePageData = await getHomePageData();
 
-  if (!homePageData || !homePageData._id) {
-    redirect("/admin/homepage");
-  }
+  // Si pas de homepage du tout → on peut quand même configurer une section
+  // (elle sera créée lors de la sauvegarde via POST)
+  // On redirige uniquement si on est en mode "édition" et que la homepage n'existe pas
+  const sectionData = homePageData?.[sectionKey] ?? null;
 
-  const sectionData = homePageData[sectionKey] || null;
+  // Pas de redirect ici — le formulaire gère le cas sectionData = null (isNew = true)
 
   return (
     <EditSectionDetails
