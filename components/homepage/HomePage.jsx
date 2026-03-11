@@ -811,8 +811,8 @@ export default function HomePage({ data }) {
             <div>
               <h2 className="text-xl font-bold text-white">Contenu Actuel</h2>
               <p className="text-sm text-white/80">
-                Page d'accueil — {data.sections.length} slide
-                {data.sections.length > 1 ? "s" : ""} hero
+                Page d'accueil — dernière mise à jour le{" "}
+                {new Date(data.updatedAt).toLocaleDateString("fr-FR")}
               </p>
             </div>
           </div>

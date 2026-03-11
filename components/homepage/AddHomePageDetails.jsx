@@ -39,7 +39,6 @@ const TABS = [
       </svg>
     ),
     description: "Slider principal",
-    required: true,
   },
   {
     id: "featured",
@@ -291,27 +290,6 @@ const AddHomePageDetails = () => {
   // ── Validation avant soumission ───────────────────────────────────────────
   const validate = () => {
     const { heroSection } = formData;
-
-    if (!heroSection.title?.trim()) {
-      toast.error("Le titre du hero est requis");
-      setActiveTab("hero");
-      return false;
-    }
-    if (!heroSection.subtitle?.trim()) {
-      toast.error("Le sous-titre du hero est requis");
-      setActiveTab("hero");
-      return false;
-    }
-    if (!heroSection.text?.trim()) {
-      toast.error("Le texte du hero est requis");
-      setActiveTab("hero");
-      return false;
-    }
-    if (!heroSection.video) {
-      toast.error("L'image du hero est requise");
-      setActiveTab("hero");
-      return false;
-    }
 
     // Validation avantages
     const { advantagesSection } = formData;

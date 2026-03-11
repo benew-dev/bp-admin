@@ -21,11 +21,7 @@ const NewHomePagePage = async () => {
   const homePageData = await getHomePageData();
 
   // Si une page d'accueil existe déjà avec 3 sections, rediriger vers la page principale
-  if (
-    homePageData &&
-    homePageData.sections &&
-    homePageData.sections.length >= 3
-  ) {
+  if (homePageData) {
     redirect("/admin/homepage");
   }
 
