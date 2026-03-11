@@ -242,7 +242,7 @@ const EditSectionDetails = ({ sectionKey, sectionLabel, sectionData }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const payload = cleanSectionData(sectionKey, formData);
+    const payload = cleanSectionData(formData);
 
     // Validation minimale
     if (sectionKey === "advantagesSection" && payload.advantages?.length > 8) {

@@ -69,7 +69,7 @@ export const HomePageProvider = ({ children }) => {
       );
 
       if (data.success) {
-        toast.success("Section hero mise à jour avec succès !");
+        toast.success("Section mise à jour avec succès !");
         router.push("/admin/homepage");
         router.refresh();
         return { success: true, data };
@@ -100,7 +100,7 @@ export const HomePageProvider = ({ children }) => {
       );
 
       if (data.success) {
-        toast.success("Section hero supprimée avec succès !");
+        toast.success("Section supprimée avec succès !");
         router.push("/admin/homepage");
         router.refresh();
         return { success: true, data };
