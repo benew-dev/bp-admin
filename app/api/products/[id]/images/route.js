@@ -16,7 +16,8 @@ export async function POST(req, { params }) {
     // Vérifier le role
     authorizeRoles(NextResponse, "admin");
 
-    const { id } = params;
+    const { id } = await params;
+
     await dbConnect();
 
     let product = await Product.findById(id);
@@ -108,7 +109,10 @@ export async function DELETE(req, { params }) {
     }
 
     // Supprimer de Cloudinary
-    await cloudinary.v2.uploader.destroy(imageToRemove.public_id);
+    const resourceType = imageToRemove.type === "video" ? "video" : "image";
+    await cloudinary.v2.uploader.destroy(imageToRemove.public_id, {
+      resource_type: resourceType,
+    });
 
     // Supprimer de la base de données
     product.images = product.images.filter(
