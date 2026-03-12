@@ -112,7 +112,6 @@ productSchema.index({ category: 1, sold: -1 });
 // Middleware pre-save pour mettre à jour le champ updatedAt
 productSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
-  next();
 });
 
 // Middleware pour vérifier le stock avant de sauvegarder
@@ -120,7 +119,6 @@ productSchema.pre("save", function (next) {
   if (this.isModified("stock") && this.stock < 0) {
     this.stock = 0;
   }
-  next();
 });
 
 // Middleware pre-save pour vérifier que le type et la catégorie existent et sont actifs
@@ -135,7 +133,7 @@ productSchema.pre("save", async function (next) {
       if (!type) {
         const error = new Error("Le type spécifié n'existe pas");
         error.name = "ValidationError";
-        return next(error);
+        throw new Error(error);
       }
 
       if (!type.isActive) {
@@ -143,7 +141,7 @@ productSchema.pre("save", async function (next) {
           "Impossible de créer un produit avec un type inactif",
         );
         error.name = "ValidationError";
-        return next(error);
+        throw new Error(error);
       }
 
       // Vérifier la catégorie
@@ -151,7 +149,7 @@ productSchema.pre("save", async function (next) {
       if (!category) {
         const error = new Error("La catégorie spécifiée n'existe pas");
         error.name = "ValidationError";
-        return next(error);
+        throw new Error(error);
       }
 
       if (!category.isActive) {
@@ -159,7 +157,7 @@ productSchema.pre("save", async function (next) {
           "Impossible de créer un produit avec une catégorie inactive",
         );
         error.name = "ValidationError";
-        return next(error);
+        throw new Error(error);
       }
 
       // Vérifier que la catégorie appartient au type
@@ -168,13 +166,12 @@ productSchema.pre("save", async function (next) {
           "La catégorie sélectionnée n'appartient pas au type choisi",
         );
         error.name = "ValidationError";
-        return next(error);
+        throw new Error(error);
       }
     } catch (error) {
-      return next(error);
+      throw new Error(error);
     }
   }
-  next();
 });
 
 // Méthode pour vérifier si un produit est en stock
