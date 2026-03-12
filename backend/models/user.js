@@ -306,8 +306,6 @@ userSchema.pre("save", async function (next) {
     // En production, on pourrait augmenter à 12 pour plus de sécurité
     const saltRounds = process.env.NODE_ENV === "production" ? 12 : 10;
     this.password = await bcrypt.hash(this.password, saltRounds);
-
-    next();
   } catch (error) {
     logger.error("Error hashing password", {
       userId: this._id,
@@ -316,7 +314,7 @@ userSchema.pre("save", async function (next) {
     // captureException(error, {
     //   tags: { component: 'user-model', operation: 'password-hashing' },
     // });
-    next(error);
+    throw new Error(error);
   }
 });
 
@@ -324,7 +322,6 @@ userSchema.pre("save", async function (next) {
 userSchema.pre("findOneAndUpdate", function (next) {
   // Définir updatedAt à chaque mise à jour
   this.set({ updatedAt: Date.now() });
-  next();
 });
 
 // Méthode pour comparer le mot de passe
